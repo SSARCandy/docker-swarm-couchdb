@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  couchdb:
+    image: couchdb:3.1.1
+    deploy:
+      mode: global
+    environment:
+      NODENAME: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
+      ERL_FLAGS: "-setcookie a20b37d83ef18efce400b3ace400036e"
+    networks:
+      network:
+        aliases:
+          - couchdb
+    ports:
+      - "5984:5984"
+      - "9100:9100"
+      - "4369:4369"
+    entrypoint: /bin/bash -c "cp -f /couchdb_conf /opt/couchdb/etc/local.d/couch.ini && tini -- /docker-entrypoint.sh /opt/couchdb/bin/couchdb"
+    volumes:
+      - "data-couch:/opt/couchdb/data"
+    configs:
+      - couchdb_conf
+
+networks:
+  network:
+
+configs:
+  couchdb_conf:
+    file: ./couchdb-conf.ini
+
+volumes:
+  data-couch:
